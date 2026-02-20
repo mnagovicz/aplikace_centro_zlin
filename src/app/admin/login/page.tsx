@@ -1,5 +1,6 @@
 "use client";
 
+/* eslint-disable @next/next/no-img-element */
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -46,6 +47,13 @@ export default function AdminLoginPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-sm">
+        <div className="mb-4 flex justify-center">
+          <img
+            src="/logo.jpg"
+            alt="OC Centro Zlín"
+            className="h-20 w-20 rounded-full object-cover shadow-md"
+          />
+        </div>
         <h1 className="mb-2 text-center text-2xl font-bold text-gray-900">
           Centro Zlín Admin
         </h1>

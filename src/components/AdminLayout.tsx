@@ -1,5 +1,6 @@
 "use client";
 
+/* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -34,9 +35,16 @@ export default function AdminLayout({
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-14 items-center justify-between">
             <div className="flex items-center gap-6">
-              <span className="text-lg font-bold text-gray-900">
-                Centro Zlín Admin
-              </span>
+              <div className="flex items-center gap-2">
+                <img
+                  src="/logo.jpg"
+                  alt="Centro Zlín"
+                  className="h-8 w-8 rounded-full object-cover"
+                />
+                <span className="text-lg font-bold text-gray-900">
+                  Centro Zlín Admin
+                </span>
+              </div>
               <div className="flex gap-1">
                 {navItems.map((item) => (
                   <Link
