@@ -43,6 +43,18 @@ export default function DashboardPage() {
     }
   };
 
+  const cloneGame = async (id: string) => {
+    const res = await fetch("/api/admin/games/clone", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ gameId: id }),
+    });
+    const data = await res.json();
+    if (data.game) {
+      setGames((prev) => [data.game, ...prev]);
+    }
+  };
+
   const deleteGame = async (id: string) => {
     if (!confirm("Opravdu chcete smazat tuto hru? Tato akce je nevratná.")) return;
 
@@ -121,6 +133,12 @@ export default function DashboardPage() {
               >
                 Hráči
               </Link>
+              <button
+                onClick={() => cloneGame(game.id)}
+                className="rounded-md bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 hover:bg-blue-100"
+              >
+                Klonovat
+              </button>
               <button
                 onClick={() => toggleActive(game)}
                 className={`rounded-md px-3 py-1.5 text-xs font-medium ${
