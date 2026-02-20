@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
 
   if (format === "csv") {
     const csvHeader =
-      "Jméno,Email,Registrace,Splněno stanovišť,Dokončeno,Kód odměny,Marketing souhlas\n";
+      "Jméno,Email,Registrace,Splněno stanovišť,Dokončeno,Kód odměny,Odměna vydána,Marketing souhlas\n";
     const csvRows = (players || [])
       .map((p) => {
         const answered = p.player_checkpoints?.length || 0;
@@ -46,6 +46,9 @@ export async function GET(request: NextRequest) {
             ? new Date(p.completed_at).toLocaleString("cs-CZ")
             : "Ne",
           p.completion_code || "-",
+          p.redeemed_at
+            ? new Date(p.redeemed_at).toLocaleString("cs-CZ")
+            : "Ne",
           p.marketing_consent ? "Ano" : "Ne",
         ].join(",");
       })
