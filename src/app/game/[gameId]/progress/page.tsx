@@ -1,10 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import ErrorMessage from "@/components/ErrorMessage";
 import ProgressBar from "@/components/ProgressBar";
+
+const QrScanner = dynamic(() => import("@/components/QrScanner"), {
+  ssr: false,
+});
 
 interface CheckpointStatus {
   id: string;
@@ -22,6 +27,20 @@ export default function ProgressPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [allCompleted, setAllCompleted] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
+
+  const handleQrScan = useCallback(
+    (url: string) => {
+      setShowScanner(false);
+      const match = url.match(/\/scan\/([^/?]+)/);
+      if (match) {
+        router.push(`/game/${gameId}/scan/${match[1]}`);
+      } else if (url.startsWith("http")) {
+        window.location.href = url;
+      }
+    },
+    [gameId, router]
+  );
 
   useEffect(() => {
     const sessionToken = localStorage.getItem(`session_${gameId}`);
@@ -132,9 +151,21 @@ export default function ProgressPage() {
       )}
 
       {!allCompleted && (
-        <p className="text-center text-sm text-gray-500">
-          Najděte další QR kód v obchodním centru a naskenujte ho.
-        </p>
+        <div className="space-y-3">
+          <button
+            onClick={() => setShowScanner(true)}
+            className="w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-700"
+          >
+            Načíst další QR kód
+          </button>
+          <p className="text-center text-sm text-gray-500">
+            Nebo najděte QR kód v obchodním centru a naskenujte ho.
+          </p>
+        </div>
+      )}
+
+      {showScanner && (
+        <QrScanner onScan={handleQrScan} onClose={() => setShowScanner(false)} />
       )}
     </div>
   );

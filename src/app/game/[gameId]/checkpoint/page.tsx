@@ -1,9 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import ErrorMessage from "@/components/ErrorMessage";
+
+const QrScanner = dynamic(() => import("@/components/QrScanner"), {
+  ssr: false,
+});
 
 interface CheckpointData {
   checkpointId: string;
@@ -26,6 +31,21 @@ export default function CheckpointPage() {
   } | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showScanner, setShowScanner] = useState(false);
+
+  const handleQrScan = useCallback(
+    (url: string) => {
+      setShowScanner(false);
+      // Extract token from scanned URL
+      const match = url.match(/\/scan\/([^/?]+)/);
+      if (match) {
+        router.push(`/game/${gameId}/scan/${match[1]}`);
+      } else if (url.startsWith("http")) {
+        window.location.href = url;
+      }
+    },
+    [gameId, router]
+  );
 
   useEffect(() => {
     const stored = sessionStorage.getItem("currentCheckpoint");
@@ -115,12 +135,32 @@ export default function CheckpointPage() {
             ? "Výborně, stanoviště splněno!"
             : "Nevadí, stanoviště je zaznamenáno. Pokračujte dál!"}
         </p>
-        <button
-          onClick={handleContinue}
-          className="w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-700"
-        >
-          {result.allCompleted ? "Dokončit hru" : "Pokračovat"}
-        </button>
+        {result.allCompleted ? (
+          <button
+            onClick={handleContinue}
+            className="w-full rounded-lg bg-green-600 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-green-700"
+          >
+            Dokončit hru
+          </button>
+        ) : (
+          <div className="space-y-3">
+            <button
+              onClick={() => setShowScanner(true)}
+              className="w-full rounded-lg bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-700"
+            >
+              Načíst další QR kód
+            </button>
+            <button
+              onClick={handleContinue}
+              className="w-full rounded-lg bg-gray-100 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-200"
+            >
+              Zobrazit průběh
+            </button>
+          </div>
+        )}
+        {showScanner && (
+          <QrScanner onScan={handleQrScan} onClose={() => setShowScanner(false)} />
+        )}
       </div>
     );
   }
