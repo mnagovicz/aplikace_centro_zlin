@@ -91,15 +91,20 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // Send email (non-blocking)
+  // Send email (must await, otherwise Vercel kills the function before it finishes)
   const game = player.games;
-  sendCompletionEmail({
-    playerName: player.name,
-    playerEmail: player.email,
-    completionCode,
-    gameName: game.name,
-    rewardDescription: game.reward_description || "Odměna v OC Centro Zlín",
-  }).catch((err) => console.error("Email send failed:", err));
+  try {
+    await sendCompletionEmail({
+      playerName: player.name,
+      playerEmail: player.email,
+      completionCode,
+      gameName: game.name,
+      rewardDescription: game.reward_description || "Odměna v OC Centro Zlín",
+    });
+    console.log("Email sent successfully to", player.email);
+  } catch (err) {
+    console.error("Email send failed:", err);
+  }
 
   return NextResponse.json({ completionCode });
 }
