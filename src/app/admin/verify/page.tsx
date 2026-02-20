@@ -12,12 +12,14 @@ interface VerifyResult {
   gameName: string;
   rewardDescription: string;
   completedAt: string;
+  redeemedAt: string | null;
 }
 
 export default function VerifyPage() {
   const [code, setCode] = useState("");
   const [result, setResult] = useState<VerifyResult | null>(null);
   const [loading, setLoading] = useState(false);
+  const [redeeming, setRedeeming] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -44,6 +46,30 @@ export default function VerifyPage() {
       setError("Nepodařilo se ověřit kód");
     }
     setLoading(false);
+  };
+
+  const handleRedeem = async () => {
+    setRedeeming(true);
+    try {
+      const res = await fetch("/api/verify-code", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error);
+      } else {
+        setResult((prev) =>
+          prev ? { ...prev, redeemedAt: new Date().toISOString() } : prev
+        );
+      }
+    } catch {
+      setError("Nepodařilo se vydat odměnu");
+    }
+    setRedeeming(false);
   };
 
   return (
@@ -80,7 +106,36 @@ export default function VerifyPage() {
 
         {error && <ErrorMessage message={error} />}
 
-        {result && (
+        {result && result.redeemedAt && (
+          <div className="rounded-lg border-2 border-orange-300 bg-orange-50 p-4">
+            <div className="mb-2 flex items-center gap-2">
+              <span className="text-2xl">!</span>
+              <h3 className="text-lg font-bold text-orange-800">
+                Odměna již byla vydána
+              </h3>
+            </div>
+            <dl className="space-y-1 text-sm">
+              <div className="flex justify-between">
+                <dt className="text-orange-700">Hráč:</dt>
+                <dd className="font-medium text-orange-900">
+                  {result.playerName}
+                </dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="text-orange-700">Hra:</dt>
+                <dd className="text-orange-900">{result.gameName}</dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="text-orange-700">Vydáno:</dt>
+                <dd className="font-medium text-orange-900">
+                  {new Date(result.redeemedAt).toLocaleString("cs-CZ")}
+                </dd>
+              </div>
+            </dl>
+          </div>
+        )}
+
+        {result && !result.redeemedAt && (
           <div className="rounded-lg border-2 border-green-300 bg-green-50 p-4">
             <div className="mb-2 flex items-center gap-2">
               <span className="text-2xl">✓</span>
@@ -114,6 +169,13 @@ export default function VerifyPage() {
                 </dd>
               </div>
             </dl>
+            <button
+              onClick={handleRedeem}
+              disabled={redeeming}
+              className="mt-4 w-full rounded-lg bg-green-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-green-700 disabled:opacity-50"
+            >
+              {redeeming ? "Vydávám..." : "Vydat odměnu"}
+            </button>
           </div>
         )}
       </div>
