@@ -12,6 +12,13 @@ export async function sendCompletionEmail(params: SendEmailParams) {
   const publicKey = process.env.EMAILJS_PUBLIC_KEY;
   const privateKey = process.env.EMAILJS_PRIVATE_KEY;
 
+  console.log("EmailJS config check:", {
+    serviceId: serviceId ? "SET" : "MISSING",
+    templateId: templateId ? "SET" : "MISSING",
+    publicKey: publicKey ? "SET" : "MISSING",
+    privateKey: privateKey ? "SET" : "MISSING",
+  });
+
   if (!serviceId || !templateId || !publicKey) {
     console.warn("EmailJS not configured, skipping email send");
     return;
