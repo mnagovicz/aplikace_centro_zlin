@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
-  const { gameId, name, question, answers, correctAnswerIndex, orderNumber } =
+  const { gameId, name, question, answers, correctAnswerIndex, orderNumber, imageUrl } =
     body;
 
   if (!gameId || !name || !question || !answers || correctAnswerIndex === undefined) {
@@ -61,6 +61,7 @@ export async function POST(request: NextRequest) {
       correct_answer_index: correctAnswerIndex,
       order_number: orderNumber || 0,
       qr_token: qrToken,
+      image_url: imageUrl || null,
     })
     .select()
     .single();
@@ -92,6 +93,7 @@ export async function PUT(request: NextRequest) {
   if (correctAnswerIndex !== undefined)
     updates.correct_answer_index = correctAnswerIndex;
   if (orderNumber !== undefined) updates.order_number = orderNumber;
+  if (body.imageUrl !== undefined) updates.image_url = body.imageUrl;
 
   const { data: checkpoint, error } = await supabase
     .from("checkpoints")

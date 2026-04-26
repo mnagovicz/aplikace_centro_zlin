@@ -41,6 +41,7 @@ export async function GET(request: NextRequest) {
       action: "register",
       gameId: game.id,
       gameName: game.name,
+      gameImageUrl: game.image_url || null,
       checkpointId: checkpoint.id,
       checkpointName: checkpoint.name,
     });
@@ -59,6 +60,7 @@ export async function GET(request: NextRequest) {
       action: "register",
       gameId: game.id,
       gameName: game.name,
+      gameImageUrl: game.image_url || null,
       checkpointId: checkpoint.id,
       checkpointName: checkpoint.name,
     });
@@ -98,5 +100,6 @@ export async function GET(request: NextRequest) {
     checkpointName: checkpoint.name,
     question: checkpoint.question,
     answers: checkpoint.answers,
+    checkpointImageUrl: checkpoint.image_url || null,
   });
 }

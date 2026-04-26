@@ -1,5 +1,6 @@
 "use client";
 
+/* eslint-disable @next/next/no-img-element */
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import LoadingSpinner from "@/components/LoadingSpinner";
@@ -10,6 +11,14 @@ export default function CompletePage() {
   const gameId = params.gameId as string;
 
   const [completionCode, setCompletionCode] = useState<string | null>(null);
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
+  const [leaderboard, setLeaderboard] = useState<{
+    playerCorrect: number;
+    bestScore: number;
+    totalCheckpoints: number;
+    playerRank: number;
+    totalPlayers: number;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -33,6 +42,12 @@ export default function CompletePage() {
           setError(data.error);
         } else {
           setCompletionCode(data.completionCode);
+          if (data.qrDataUrl) {
+            setQrDataUrl(data.qrDataUrl);
+          }
+          if (data.leaderboard) {
+            setLeaderboard(data.leaderboard);
+          }
         }
         setLoading(false);
       })
@@ -93,12 +108,75 @@ export default function CompletePage() {
         </p>
       </div>
 
+      {qrDataUrl && (
+        <div className="mb-4">
+          <p className="mb-2 text-xs text-gray-500">QR kód pro rychlé ověření:</p>
+          <img
+            src={qrDataUrl}
+            alt="QR kód pro ověření odměny"
+            className="mx-auto h-48 w-48"
+          />
+        </div>
+      )}
+
       <button
         onClick={handleCopy}
         className="mb-6 inline-flex items-center gap-2 rounded-lg bg-green-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-green-700"
       >
         {copied ? "Zkopírováno!" : "Kopírovat kód"}
       </button>
+
+      {leaderboard && (
+        <div className="mb-4 rounded-lg border border-purple-200 bg-purple-50 p-4">
+          <h3 className="mb-3 text-sm font-bold text-purple-900">
+            Vaše výsledky
+          </h3>
+          <div className="mb-3 space-y-2">
+            <div>
+              <div className="mb-1 flex justify-between text-xs">
+                <span className="text-purple-700">Vaše správné odpovědi</span>
+                <span className="font-semibold text-purple-900">
+                  {leaderboard.playerCorrect}/{leaderboard.totalCheckpoints}
+                </span>
+              </div>
+              <div className="h-2.5 w-full overflow-hidden rounded-full bg-purple-200">
+                <div
+                  className="h-full rounded-full bg-purple-600 transition-all duration-500"
+                  style={{
+                    width: `${Math.round(
+                      (leaderboard.playerCorrect / leaderboard.totalCheckpoints) *
+                        100
+                    )}%`,
+                  }}
+                />
+              </div>
+            </div>
+            <div>
+              <div className="mb-1 flex justify-between text-xs">
+                <span className="text-purple-700">Nejlepší hráč</span>
+                <span className="font-semibold text-purple-900">
+                  {leaderboard.bestScore}/{leaderboard.totalCheckpoints}
+                </span>
+              </div>
+              <div className="h-2.5 w-full overflow-hidden rounded-full bg-purple-200">
+                <div
+                  className="h-full rounded-full bg-yellow-500 transition-all duration-500"
+                  style={{
+                    width: `${Math.round(
+                      (leaderboard.bestScore / leaderboard.totalCheckpoints) * 100
+                    )}%`,
+                  }}
+                />
+              </div>
+            </div>
+          </div>
+          <p className="text-center text-sm font-medium text-purple-800">
+            {leaderboard.playerCorrect >= leaderboard.bestScore
+              ? "Překonali jste nejlepšího hráče!"
+              : `Umístili jste se na ${leaderboard.playerRank}. místě z ${leaderboard.totalPlayers} hráčů`}
+          </p>
+        </div>
+      )}
 
       <div className="rounded-lg bg-blue-50 p-4">
         <p className="text-sm text-blue-800">

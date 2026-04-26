@@ -48,7 +48,17 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   const body = await request.json();
-  const { id, name, description, rewardDescription, isActive } = body;
+  const {
+    id,
+    name,
+    description,
+    rewardDescription,
+    isActive,
+    primaryColor,
+    backgroundColor,
+    imageUrl,
+    requireCorrectAnswer,
+  } = body;
 
   if (!id) {
     return NextResponse.json({ error: "Chybí ID hry" }, { status: 400 });
@@ -62,6 +72,11 @@ export async function PUT(request: NextRequest) {
   if (rewardDescription !== undefined)
     updates.reward_description = rewardDescription;
   if (isActive !== undefined) updates.is_active = isActive;
+  if (primaryColor !== undefined) updates.primary_color = primaryColor;
+  if (backgroundColor !== undefined) updates.background_color = backgroundColor;
+  if (imageUrl !== undefined) updates.image_url = imageUrl;
+  if (requireCorrectAnswer !== undefined)
+    updates.require_correct_answer = requireCorrectAnswer;
 
   const { data: game, error } = await supabase
     .from("games")

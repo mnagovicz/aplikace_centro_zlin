@@ -1,9 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
+import dynamic from "next/dynamic";
 import AdminLayout from "@/components/AdminLayout";
 import ErrorMessage from "@/components/ErrorMessage";
 import LoadingSpinner from "@/components/LoadingSpinner";
+
+const QrScanner = dynamic(() => import("@/components/QrScanner"), {
+  ssr: false,
+});
 
 interface VerifyResult {
   valid: boolean;
@@ -16,14 +22,16 @@ interface VerifyResult {
 }
 
 export default function VerifyPage() {
+  const searchParams = useSearchParams();
   const [code, setCode] = useState("");
   const [result, setResult] = useState<VerifyResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [redeeming, setRedeeming] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showScanner, setShowScanner] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const verifyCode = useCallback(async (codeToVerify: string) => {
+    if (!codeToVerify.trim()) return;
     setError(null);
     setResult(null);
     setLoading(true);
@@ -32,7 +40,7 @@ export default function VerifyPage() {
       const res = await fetch("/api/verify-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code }),
+        body: JSON.stringify({ code: codeToVerify }),
       });
 
       const data = await res.json();
@@ -46,6 +54,33 @@ export default function VerifyPage() {
       setError("Nepodařilo se ověřit kód");
     }
     setLoading(false);
+  }, []);
+
+  // Auto-verify if code is in URL
+  useEffect(() => {
+    const urlCode = searchParams.get("code");
+    if (urlCode) {
+      setCode(urlCode.toUpperCase());
+      verifyCode(urlCode);
+    }
+  }, [searchParams, verifyCode]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await verifyCode(code);
+  };
+
+  const handleQrScan = (url: string) => {
+    setShowScanner(false);
+    // Extract code from verify URL
+    const match = url.match(/[?&]code=([A-Z0-9]+)/i);
+    if (match) {
+      const scannedCode = match[1].toUpperCase();
+      setCode(scannedCode);
+      verifyCode(scannedCode);
+    } else {
+      setError("QR kód neobsahuje platný ověřovací kód");
+    }
   };
 
   const handleRedeem = async () => {
@@ -79,10 +114,10 @@ export default function VerifyPage() {
           Ověření kódu odměny
         </h2>
         <p className="mb-6 text-sm text-gray-500">
-          Zadejte kód, který vám hráč ukáže pro vyzvednutí odměny.
+          Zadejte kód nebo naskenujte QR kód hráče.
         </p>
 
-        <form onSubmit={handleSubmit} className="mb-6">
+        <form onSubmit={handleSubmit} className="mb-4">
           <div className="flex gap-2">
             <input
               type="text"
@@ -101,6 +136,17 @@ export default function VerifyPage() {
             </button>
           </div>
         </form>
+
+        <button
+          onClick={() => setShowScanner(true)}
+          className="mb-6 w-full rounded-lg bg-gray-100 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-200"
+        >
+          Naskenovat QR kód
+        </button>
+
+        {showScanner && (
+          <QrScanner onScan={handleQrScan} onClose={() => setShowScanner(false)} />
+        )}
 
         {loading && <LoadingSpinner text="Ověřuji..." />}
 

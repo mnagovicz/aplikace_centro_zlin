@@ -4,6 +4,10 @@ export interface Game {
   description: string | null;
   is_active: boolean;
   reward_description: string | null;
+  image_url: string | null;
+  primary_color: string | null;
+  background_color: string | null;
+  require_correct_answer: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -17,6 +21,7 @@ export interface Checkpoint {
   correct_answer_index: number;
   order_number: number;
   qr_token: string;
+  image_url: string | null;
   created_at: string;
   updated_at: string;
 }

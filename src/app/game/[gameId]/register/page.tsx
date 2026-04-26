@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+/* eslint-disable @next/next/no-img-element */
+import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import ErrorMessage from "@/components/ErrorMessage";
@@ -16,6 +17,12 @@ export default function RegisterPage() {
   const [marketingConsent, setMarketingConsent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [gameImageUrl, setGameImageUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    const img = sessionStorage.getItem("gameImageUrl");
+    if (img) setGameImageUrl(img);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,6 +75,15 @@ export default function RegisterPage() {
 
   return (
     <div>
+      {gameImageUrl && (
+        <div className="mb-4 overflow-hidden rounded-lg">
+          <img
+            src={gameImageUrl}
+            alt="Hra"
+            className="h-40 w-full object-cover"
+          />
+        </div>
+      )}
       <h2 className="mb-2 text-2xl font-bold text-gray-900">Registrace</h2>
       <p className="mb-6 text-sm text-gray-600">
         Pro účast v soutěži se prosím zaregistrujte.

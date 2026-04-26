@@ -24,7 +24,9 @@ export default function CheckpointsPage() {
   const [formAnswers, setFormAnswers] = useState(["", "", ""]);
   const [formCorrectIndex, setFormCorrectIndex] = useState(0);
   const [formOrder, setFormOrder] = useState(0);
+  const [formImageUrl, setFormImageUrl] = useState("");
   const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   // QR state
   const [qrImage, setQrImage] = useState<string | null>(null);
@@ -49,6 +51,7 @@ export default function CheckpointsPage() {
     setFormAnswers(["", "", ""]);
     setFormCorrectIndex(0);
     setFormOrder(checkpoints.length);
+    setFormImageUrl("");
     setEditingId(null);
     setShowForm(false);
   };
@@ -60,7 +63,35 @@ export default function CheckpointsPage() {
     setFormAnswers([...cp.answers]);
     setFormCorrectIndex(cp.correct_answer_index);
     setFormOrder(cp.order_number);
+    setFormImageUrl(cp.image_url || "");
     setShowForm(true);
+  };
+
+  const handleCheckpointImageUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingImage(true);
+    setError(null);
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("folder", `checkpoints/${gameId}`);
+    try {
+      const res = await fetch("/api/admin/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error);
+      } else {
+        setFormImageUrl(data.url);
+      }
+    } catch {
+      setError("Nepodařilo se nahrát obrázek");
+    }
+    setUploadingImage(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -82,6 +113,7 @@ export default function CheckpointsPage() {
       answers: filteredAnswers,
       correctAnswerIndex: formCorrectIndex,
       orderNumber: formOrder,
+      imageUrl: formImageUrl || null,
     };
 
     const res = await fetch("/api/admin/checkpoints", {
@@ -299,6 +331,40 @@ export default function CheckpointsPage() {
               <p className="mt-1 text-xs text-gray-500">
                 Vyberte správnou odpověď kliknutím na kolečko
               </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Obrázek stanoviště
+              </label>
+              <div className="mt-1">
+                {formImageUrl && (
+                  <div className="mb-2">
+                    <img
+                      src={formImageUrl}
+                      alt="Obrázek stanoviště"
+                      className="h-24 w-full rounded-lg object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setFormImageUrl("")}
+                      className="mt-1 text-xs text-red-600 hover:underline"
+                    >
+                      Odstranit
+                    </button>
+                  </div>
+                )}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleCheckpointImageUpload}
+                  disabled={uploadingImage}
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:rounded-lg file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-blue-700 hover:file:bg-blue-100"
+                />
+                {uploadingImage && (
+                  <p className="mt-1 text-xs text-blue-600">Nahrávám...</p>
+                )}
+              </div>
             </div>
 
             <div className="flex gap-3">

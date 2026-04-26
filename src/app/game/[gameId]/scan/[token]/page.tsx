@@ -37,6 +37,9 @@ export default function ScanPage() {
                 token,
               })
             );
+            if (data.gameImageUrl) {
+              sessionStorage.setItem("gameImageUrl", data.gameImageUrl);
+            }
             router.replace(`/game/${data.gameId}/register`);
             break;
 
@@ -48,6 +51,7 @@ export default function ScanPage() {
                 checkpointName: data.checkpointName,
                 question: data.question,
                 answers: data.answers,
+                checkpointImageUrl: data.checkpointImageUrl || null,
               })
             );
             router.replace(`/game/${data.gameId}/checkpoint`);

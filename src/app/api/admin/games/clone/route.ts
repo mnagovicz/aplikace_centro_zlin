@@ -30,6 +30,10 @@ export async function POST(request: NextRequest) {
       name: `${original.name} (kopie)`,
       description: original.description,
       reward_description: original.reward_description,
+      image_url: original.image_url,
+      primary_color: original.primary_color,
+      background_color: original.background_color,
+      require_correct_answer: original.require_correct_answer,
       is_active: false,
     })
     .select()
