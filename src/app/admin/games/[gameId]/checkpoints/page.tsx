@@ -404,10 +404,10 @@ export default function CheckpointsPage() {
             key={cp.id}
             className="rounded-lg border border-gray-200 bg-white p-4"
           >
-            <div className="flex items-start justify-between">
-              <div>
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700">
                     {index + 1}
                   </span>
                   <h3 className="font-semibold text-gray-900">{cp.name}</h3>
@@ -428,6 +428,17 @@ export default function CheckpointsPage() {
                   ))}
                 </div>
               </div>
+              {cp.image_url ? (
+                <img
+                  src={cp.image_url}
+                  alt={cp.name}
+                  className="h-16 w-16 shrink-0 rounded-lg object-cover border border-gray-100"
+                />
+              ) : (
+                <div className="h-16 w-16 shrink-0 rounded-lg bg-gray-100 flex items-center justify-center text-gray-300 text-xs border border-gray-200">
+                  🖼️
+                </div>
+              )}
             </div>
             <div className="mt-3 flex flex-wrap gap-2">
               <button
