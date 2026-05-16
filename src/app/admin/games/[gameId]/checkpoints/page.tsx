@@ -31,6 +31,7 @@ export default function CheckpointsPage() {
   // QR state
   const [qrImage, setQrImage] = useState<string | null>(null);
   const [qrUrl, setQrUrl] = useState<string | null>(null);
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
 
   const fetchCheckpoints = useCallback(async () => {
     const res = await fetch(`/api/admin/checkpoints?gameId=${gameId}`);
@@ -203,6 +204,27 @@ export default function CheckpointsPage() {
       {error && (
         <div className="mb-4">
           <ErrorMessage message={error} />
+        </div>
+      )}
+
+      {/* Lightbox */}
+      {lightboxUrl && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+          onClick={() => setLightboxUrl(null)}
+        >
+          <img
+            src={lightboxUrl}
+            alt="Náhled stanoviště"
+            className="max-h-[90vh] max-w-[90vw] rounded-xl object-contain shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          />
+          <button
+            onClick={() => setLightboxUrl(null)}
+            className="absolute right-4 top-4 rounded-full bg-white/20 p-2 text-white hover:bg-white/40"
+          >
+            ✕
+          </button>
         </div>
       )}
 
@@ -432,7 +454,8 @@ export default function CheckpointsPage() {
                 <img
                   src={cp.image_url}
                   alt={cp.name}
-                  className="h-16 w-16 shrink-0 rounded-lg object-cover border border-gray-100"
+                  className="h-16 w-16 shrink-0 rounded-lg object-cover border border-gray-100 cursor-zoom-in hover:opacity-90 transition-opacity"
+                  onClick={() => setLightboxUrl(cp.image_url!)}
                 />
               ) : (
                 <div className="h-16 w-16 shrink-0 rounded-lg bg-gray-100 flex items-center justify-center text-gray-300 text-xs border border-gray-200">
