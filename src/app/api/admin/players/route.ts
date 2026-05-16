@@ -33,15 +33,19 @@ export async function GET(request: NextRequest) {
 
   if (format === "csv") {
     const csvHeader =
-      "Jméno,Email,Registrace,Splněno stanovišť,Dokončeno,Kód odměny,Odměna vydána,Marketing souhlas\n";
+      "Jméno,Email,Registrace,Splněno stanovišť,Správné odpovědi,Špatné odpovědi,Dokončeno,Kód odměny,Odměna vydána,Marketing souhlas\n";
     const csvRows = (players || [])
       .map((p) => {
-        const answered = p.player_checkpoints?.length || 0;
+        const correct = p.player_checkpoints?.filter((cp: { answered_correctly: boolean }) => cp.answered_correctly).length || 0;
+        const incorrect = p.player_checkpoints?.filter((cp: { answered_correctly: boolean }) => !cp.answered_correctly).length || 0;
+        const answered = correct + incorrect;
         return [
           `"${p.name}"`,
           `"${p.email}"`,
           new Date(p.created_at).toLocaleString("cs-CZ"),
           `${answered}/${totalCheckpoints || 0}`,
+          correct,
+          incorrect,
           p.completed_at
             ? new Date(p.completed_at).toLocaleString("cs-CZ")
             : "Ne",

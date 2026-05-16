@@ -91,7 +91,9 @@ export default function PlayersPage() {
           </thead>
           <tbody className="divide-y divide-gray-100">
             {players.map((p) => {
-              const answered = p.player_checkpoints?.length || 0;
+              const correct = p.player_checkpoints?.filter((cp) => cp.answered_correctly).length || 0;
+              const incorrect = p.player_checkpoints?.filter((cp) => !cp.answered_correctly).length || 0;
+              const answered = correct + incorrect;
               return (
                 <tr key={p.id} className="hover:bg-gray-50">
                   <td className="px-3 py-2 font-medium text-gray-900">
@@ -99,15 +101,24 @@ export default function PlayersPage() {
                   </td>
                   <td className="px-3 py-2 text-gray-600">{p.email}</td>
                   <td className="px-3 py-2">
-                    <span
-                      className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                        p.completion_code
-                          ? "bg-green-100 text-green-700"
-                          : "bg-gray-100 text-gray-600"
-                      }`}
-                    >
-                      {answered}/{totalCheckpoints}
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                          p.completion_code
+                            ? "bg-green-100 text-green-700"
+                            : "bg-gray-100 text-gray-600"
+                        }`}
+                      >
+                        {answered}/{totalCheckpoints}
+                      </span>
+                      {answered > 0 && (
+                        <span className="text-xs text-gray-500">
+                          <span className="text-green-600 font-medium">✓{correct}</span>
+                          {" "}
+                          <span className="text-red-500 font-medium">✗{incorrect}</span>
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="px-3 py-2 font-mono text-xs text-gray-600">
                     {p.completion_code || "-"}
