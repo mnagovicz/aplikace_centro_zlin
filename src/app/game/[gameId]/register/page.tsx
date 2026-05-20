@@ -18,10 +18,13 @@ export default function RegisterPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [gameImageUrl, setGameImageUrl] = useState<string | null>(null);
+  const [gameName, setGameName] = useState<string | null>(null);
 
   useEffect(() => {
     const img = sessionStorage.getItem("gameImageUrl");
     if (img) setGameImageUrl(img);
+    const name = sessionStorage.getItem("gameName");
+    if (name) setGameName(name);
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -83,6 +86,9 @@ export default function RegisterPage() {
             className="h-40 w-full object-cover"
           />
         </div>
+      )}
+      {gameName && (
+        <h1 className="mb-1 text-xl font-bold text-blue-700">{gameName}</h1>
       )}
       <h2 className="mb-2 text-2xl font-bold text-gray-900">Registrace</h2>
       <p className="mb-6 text-sm text-gray-600">

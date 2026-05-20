@@ -40,6 +40,9 @@ export default function ScanPage() {
             if (data.gameImageUrl) {
               sessionStorage.setItem("gameImageUrl", data.gameImageUrl);
             }
+            if (data.gameName) {
+              sessionStorage.setItem("gameName", data.gameName);
+            }
             router.replace(`/game/${data.gameId}/register`);
             break;
 
